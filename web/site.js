@@ -34,7 +34,7 @@ function welcomeAnnouncement(){
   let autoClose;
   dialog.addEventListener('close',()=>{clearTimeout(autoClose);document.body.classList.remove('welcome-notice-open');dialog.remove();$('.brand')?.focus({preventScroll:true});});
   show();document.body.classList.add('welcome-notice-open');dialog.showModal();
-  autoClose=setTimeout(()=>{if(dialog.open)dialog.close();},5000);
+  autoClose=setTimeout(()=>{if(dialog.open)dialog.close();},15000);
 }
 function shell(content) {
   const s=data.settings;

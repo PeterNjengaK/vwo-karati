@@ -83,9 +83,9 @@ Choose Website content ? Add announcement. Enter a title and short message, opti
 
 Active announcements also open automatically in an animated home-page welcome dialog. Visitors can close it with Escape, the close button, or Explore our church. Multiple notices have a Next announcement button. The entrance and brief pulse respect reduced-motion preferences. The dialog appears on home-page loads unless manually dismissed in the current tab; other pages retain undismissed banners. No active announcement means no popup.
 
-The home-page announcement popup closes automatically five seconds after opening. Its banner remains available on the page; visitors can also close the popup immediately.
+The home-page announcement popup closes automatically fifteen seconds after opening. Its banner remains available on the page; visitors can also close the popup immediately.
 
-Closing the welcome popup, pressing Escape, or selecting Explore our church dismisses its active notices for the tab. Dismissing a banner hides that notice for the tab. A fresh tab starts a new dismissal session. Automatic five-second closure keeps the banner available and does not mark notices dismissed. Browser restore/duplicate-tab features may preserve session storage.
+Closing the welcome popup, pressing Escape, or selecting Explore our church dismisses its active notices for the tab. Dismissing a banner hides that notice for the tab. A fresh tab starts a new dismissal session. Automatic fifteen-second closure keeps the banner available and does not mark notices dismissed. Browser restore/duplicate-tab features may preserve session storage.
 
 ## Automatic backup protection
 

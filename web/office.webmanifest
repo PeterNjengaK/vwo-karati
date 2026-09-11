@@ -1,0 +1,15 @@
+{
+  "id": "/desktop",
+  "name": "VWO Church Office",
+  "short_name": "VWO Office",
+  "description": "The connected VWO Karati church office. Internet access is required.",
+  "start_url": "/desktop",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8f7f2",
+  "theme_color": "#173f35",
+  "icons": [
+    { "src": "/office-icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/office-icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

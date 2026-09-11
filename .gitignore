@@ -1,0 +1,29 @@
+.env
+data/
+node_modules/
+.npm-cache/
+test-results/
+ChurchRegister/build/
+ChurchRegister/dist/
+ChurchRegister/credentials.json
+ChurchRegister/members*.json
+ChurchRegister/member_photos/
+ChurchRegister/backups/
+__pycache__/
+
+# Secrets and local machine files
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.sqlite
+*.sqlite-*
+*.db
+*.dpapi
+*.log
+.vscode/
+# Rebuildable desktop binaries
+ChurchRegister/*.exe
+ChurchRegister/release/

@@ -124,3 +124,5 @@ Home slideshow and navigation: the full-width hero starts with the original choi
 
 
 Visit and homepage additions: Visit Us includes a Google map at the same church coordinates as the directions link. Hero slides change every five seconds, with the existing pause/reduced-motion controls. Church settings now accepts a WhatsApp number with country code and a homepage YouTube preaching link (including a seconds timestamp). The homepage video requests muted autoplay and provides the player's sound controls; browsers may still require pressing Play. The WhatsApp prompt opens once per tab and plays one short welcome tone only after browser interaction permits audio, with a mute option. Chat opens WhatsApp; it does not send a message automatically. Empty settings hide the relevant component.
+
+Homepage video controls: Church settings includes separate start-minute and start-second inputs. They override timestamps pasted in the video link; saving stores a canonical YouTube timestamp. Existing timestamp links populate the inputs automatically. Clearing the video link hides the homepage player.

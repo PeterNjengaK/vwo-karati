@@ -285,6 +285,12 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
         data.whatsapp=string(b.whatsapp||'','WhatsApp number',25,false).replace(/[ +()-]/g,'');
         if(data.whatsapp&&!/^[1-9]\d{7,14}$/.test(data.whatsapp))fail(400,'Enter a WhatsApp number with country code.');
         data.home_video=safeUrl(b.home_video);
+        if(b.home_video_minutes!==undefined||b.home_video_seconds!==undefined){
+          const minutes=Number(b.home_video_minutes),seconds=Number(b.home_video_seconds);
+          if(!/^\d+$/.test(String(b.home_video_minutes))||!/^\d+$/.test(String(b.home_video_seconds))||!Number.isInteger(minutes)||!Number.isInteger(seconds)||minutes<0||minutes>1439||seconds<0||seconds>59)fail(400,'Use whole minutes (0-1439) and seconds (0-59) for the video start time.');
+          if(data.home_video){const u=new URL(data.home_video);u.searchParams.delete('t');u.searchParams.delete('start');u.searchParams.set('t',String(minutes*60+seconds)+'s');data.home_video=u.href;}
+        }
+
         if(data.home_video){const u=new URL(data.home_video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)?u.searchParams.get('v')||u.pathname.match(/^\/(?:live|shorts|embed)\/([^/]+)/)?.[1]:'';if(!/^[\w-]{11}$/.test(id||''))fail(400,'Use a direct YouTube video link for the homepage.');}
 
         for(const key of ['visit_info','transport_info','children_info'])data[key]=string(b[key]||'',key,3000,false);

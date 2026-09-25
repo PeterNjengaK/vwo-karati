@@ -94,3 +94,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Clean-Workspace.ps1
 ```
 
 This cleanup command does not remove the live database, backups, installed dependencies, desktop builds, or installer.
+
+
+## Publishing videos and visitor information
+
+Open **Website content > Add media / sermon** in the church office. Add a title and video links, then optionally set preacher, Bible passage, topic, series, category, service/stream date (Kenya time), upload date, and a thumbnail. Select **Publish on the website** to include it in `/watch`, and **Feature on the homepage** for priority placement. Several platform links can belong to the same entry. Keep a draft by leaving publication unchecked.
+
+Visitors can search and filter `/watch`, share message links, and choose an embedded player or open the original video. Automatic channel imports are not configured; add video links manually. Mark a broadcast **Live now** only while it is live, then change its category to **Livestream recording**.
+
+Gallery entries have an album field. Ministry entries have meeting and leader fields. **Church settings** contains service times, church history, first-visit guidance, transport/parking, and children/family information. Use the church leader entry's description and additional details for a biography.

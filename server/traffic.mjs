@@ -6,7 +6,7 @@ export function trafficAnalytics(db){
  db.prepare('INSERT OR IGNORE INTO traffic_secret VALUES(1,?)').run(randomBytes(32).toString('hex'));
  const secret=db.prepare('SELECT secret FROM traffic_secret WHERE id=1').get().secret;
  const aliases={'/index.html':'/','/about.html':'/about','/programs.html':'/programs','/Gallery.html':'/gallery','/contacts.html':'/contact'};
- const pages=new Set(['/','/about','/programs','/gallery','/contact','/give','/privacy']);
+ const pages=new Set(['/','/about','/programs','/gallery','/watch','/contact','/give','/privacy']);
  let cleaned='';
  function record(req,path,ip){
   path=aliases[path]||path;if(!pages.has(path)||req.method!=='GET'||req.headers.dnt==='1'||req.headers['sec-gpc']==='1')return;

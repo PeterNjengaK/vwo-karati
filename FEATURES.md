@@ -102,3 +102,13 @@ In Website content choose Add project, Add paid event, Add shop item, or Add spo
 Projects show a target and office-verified received amount; pledges never count automatically as money received. Paid events and shop items have a KES price and payment instructions or external HTTPS checkout link. Enable Accept pledges, registrations, or orders and publish when ready. Visitors receive a request reference; registration/order submission does not charge them or reserve guaranteed capacity or stock. The office handles confirmation and fulfilment, including digital products.
 
 Orders & registrations lists the latest 500 requests, including project pledges. Admins can mark pending, confirmed, paid, completed, or cancelled and add private notes. Paid requires a verified reference. Checkout links do not automatically confirm payment. Cancellations do not issue refunds. M-Pesa remains disabled until separately configured, and the existing M-Pesa giving totals do not include manually handled commerce payments. All request records are included in database snapshots.
+
+
+## Watch & Listen and public page updates
+
+- `/watch` provides keyword, platform, preacher, series, category, service/stream date, and upload-date filters, with shareable filter URLs and message links.
+- Website content ? Add media / sermon manages drafts, featured messages, categories, descriptions, thumbnails, and multiple platform links for the same service.
+- YouTube, Facebook, and TikTok players load only on request. Original links remain available when a platform prevents playback. Channel auto-import is not connected; administrators add links manually. Live now is an administrator-managed label, not automatic live detection.
+- Featured and recent messages appear on the homepage. Videos stay hosted by their respective platforms.
+- Gallery entries support named albums; ministries support meeting details and a leader; Church settings supports first-visit, transport, and family guidance. Existing church history, leader biographies, and service times remain editable.
+- The homepage gives an accurate giving call-to-action while M-Pesa is unavailable.

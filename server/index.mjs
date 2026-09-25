@@ -66,7 +66,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
     res.setHeader('X-Frame-Options','DENY');
     res.setHeader('Cache-Control','no-store');
     res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com https://www.facebook.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     if(production) res.setHeader('Strict-Transport-Security','max-age=31536000');
     const send=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));};
     try {
@@ -85,7 +85,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
           const bytes=await readFile(resolve(root,'ChurchRegister/release/VWO-Church-Office-Setup.exe'));
           res.writeHead(200,{'Content-Type':'application/octet-stream','Content-Disposition':'attachment; filename="VWO-Church-Office-Setup.exe"'});return res.end(method==='HEAD'?undefined:bytes);
         }
-        const aliases={'/':'index.html','/index.html':'index.html','/about':'index.html','/about.html':'index.html','/programs':'index.html','/programs.html':'index.html','/gallery':'index.html','/Gallery.html':'index.html','/contact':'index.html','/contacts.html':'index.html','/give':'index.html','/projects':'index.html','/events':'index.html','/shop':'index.html','/partners':'index.html','/privacy':'index.html','/admin':'admin.html','/desktop':'admin.html'};
+        const aliases={'/':'index.html','/index.html':'index.html','/watch':'index.html','/about':'index.html','/about.html':'index.html','/programs':'index.html','/programs.html':'index.html','/gallery':'index.html','/Gallery.html':'index.html','/contact':'index.html','/contacts.html':'index.html','/give':'index.html','/projects':'index.html','/events':'index.html','/shop':'index.html','/partners':'index.html','/privacy':'index.html','/admin':'admin.html','/desktop':'admin.html'};
         let file;
         if(path.startsWith('/images/')) {
           const name=decodeURIComponent(path.slice(8));
@@ -93,7 +93,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
           file=resolve(root,'Website/images',name);
         } else {
           const name=aliases[path]||path.slice(1);
-          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
+          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','watch.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
           file=resolve(root,'web',name);
         }
         const data=await readFile(file);
@@ -234,6 +234,19 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
           if(data.starts&&data.expires&&data.expires<=data.starts)fail(400,'The end time must be after the start time.');
         }
         if(b.kind==='leader')data.position=string(b.position,'Leadership title',120);
+        for(const key of ['speaker','topic','scripture','series','album','meeting','leader'])data[key]=string(b[key]||'',key,200,false);
+        if(b.kind==='sermon'){
+          data.media_type=string(b.media_type||'Sermon','Media type',40);
+          if(!['Sermon','Worship','Livestream recording','Short clip','Live now'].includes(data.media_type))fail(400,'Choose a valid media type.');
+          data.featured=b.featured===true||b.featured==='on';
+          data.upload_date=string(b.upload_date||'','Upload date',10,false);
+          if(data.upload_date&&(!/^\d{4}-\d{2}-\d{2}$/.test(data.upload_date)||!Number.isFinite(Date.parse(data.upload_date))))fail(400,'Use a valid upload date.');
+          for(const key of ['youtube_url','facebook_url','tiktok_url']){
+            data[key]=safeUrl(b[key]);
+            if(data[key]){const host=new URL(data[key]).hostname;const allowed=key==='youtube_url'?['youtube.com','www.youtube.com','youtu.be','m.youtube.com']:key==='facebook_url'?['facebook.com','www.facebook.com','m.facebook.com','fb.watch']:['tiktok.com','www.tiktok.com','vm.tiktok.com','vt.tiktok.com'];if(!allowed.includes(host))fail(400,'Use a matching platform URL for '+key);}
+          }
+          if(b.published&&!data.url&&!data.youtube_url&&!data.facebook_url&&!data.tiktok_url)fail(400,'Add a video link before publishing.');
+        }
         commerceData(b,data);
         const upload=b.image_data?uploadedImage(b.image_data):null;
         if(!upload&&data.image.startsWith('/media/')&&!db.prepare('SELECT id FROM media WHERE id=?').get(data.image.slice(7)))fail(400,'Uploaded image not found.');
@@ -255,6 +268,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
         for(const key of ['name','tagline','welcome','mission','story','address','service_times']) data[key]=string(b[key],key,3000);
         data.email=email(b.email);data.phone=b.phone?phone(b.phone):'';
         for(const key of ['youtube','facebook','tiktok']) data[key]=safeUrl(b[key]);
+        for(const key of ['visit_info','transport_info','children_info'])data[key]=string(b[key]||'',key,3000,false);
         db.prepare('UPDATE settings SET data=? WHERE id=1').run(JSON.stringify(data));audit(user.id,'settings.updated');return send({ok:true});
       }
       if(path==='/api/admin/messages'&&method==='GET') return send(db.prepare('SELECT * FROM messages ORDER BY created_at DESC').all());

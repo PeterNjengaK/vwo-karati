@@ -75,3 +75,10 @@ body.welcome-notice-open{overflow:hidden}dialog.welcome-notice{width:min(660px,9
 
 /* Matching office controls, without changing the working dashboard layout. */
 .office{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}.office .btn{border-radius:10px}.office .panel,.office .stat,.office .form-card{border-radius:16px}.office input,.office select,.office textarea{border-radius:8px}.office .panel{box-shadow:0 4px 18px #173f3505}
+
+/* Full-width rotating home photography and persistent navigation. */
+.public-site .header-shell{position:sticky;top:0;z-index:30;background:#fafbf8f5;backdrop-filter:blur(14px);border-bottom:1px solid #dfe6db}
+.public-site .hero{margin:0;border-radius:0;min-height:610px}.hero>.hero-slide{opacity:0;transition:opacity 1.2s ease;inset:0;object-fit:cover;object-position:center 43%}.hero>.hero-slide.is-active{opacity:1}.public-site .hero-content{padding-bottom:120px}.hero-controls{position:absolute;bottom:26px;left:max(24px,calc((100% - 1184px)/2));display:flex;gap:10px;align-items:center;z-index:2;color:white}.hero-controls button{min-height:42px;min-width:42px;border:1px solid #ffffff66;color:white;background:#12382caa;border-radius:9px;padding:8px 12px}.hero-counter{font-size:.8rem;min-width:40px;text-align:center}.hero-controls button:hover{background:#244e40}
+.public-site .watch-feature .channel-frame{width:100%;height:480px;max-width:none;aspect-ratio:auto;background:#f8faf5;border-radius:14px}.public-site .watch-feature .channel-facebook{max-width:100%;width:500px;height:360px;margin-left:auto;margin-right:auto}
+@media(max-width:760px){.public-site .hero{margin:0;border-radius:0;min-height:570px}.hero-controls{left:24px;bottom:20px;gap:7px}.hero-controls button{font-size:.75rem}.public-site .hero-foot{display:none}.public-site .watch-feature .channel-frame{height:520px}}
+@media(prefers-reduced-motion:reduce){.hero>.hero-slide{transition:none}}

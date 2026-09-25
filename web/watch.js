@@ -49,7 +49,7 @@ export function watchPage(data,shell,head){
  document.querySelectorAll('[data-channel]').forEach(button=>button.onclick=async()=>{
   const sequence=++channelRequest,key=button.dataset.channel,names={youtube:'YouTube',facebook:'Facebook',tiktok:'TikTok'},host=document.querySelector('#channel-feed');
   document.querySelectorAll('[data-channel]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-  host.innerHTML=`<div class="watch-feature"><h2>${names[key]}</h2><p><a class="text-link" href="${e(data.settings[key])}" target="_blank" rel="noopener">Open the full ${names[key]} account &#8599;</a></p><div id="channel-body" role="status">Loading channel content...</div></div>`;
+  host.innerHTML=`<div class="watch-feature"><h2>${names[key]}</h2><p><a class="text-link" href="${e(data.settings[key])}" target="_blank" rel="noopener">Browse all ${names[key]} videos &#8599;</a></p><div id="channel-body" role="status">Loading channel content...</div></div>`;
   const body=host.querySelector('#channel-body');
   if(key==='youtube'){
    try{const feed=await api('/api/channel/youtube');if(sequence!==channelRequest)return;
@@ -60,8 +60,8 @@ export function watchPage(data,shell,head){
   }else{
    form.elements.platform.value=names[key];form.elements.q.value='';form.elements.month.value='';limit=12;render();
    body.innerHTML='<p>Explore the latest from our church. If this feed asks you to sign in, use the account link above.</p>';
-   const frame=document.createElement('iframe');frame.title=names[key]+' church account';frame.className='channel-frame';frame.referrerPolicy='strict-origin-when-cross-origin';
-   frame.src=key==='tiktok'?'/channel/tiktok':'https://www.facebook.com/plugins/page.php?href='+encodeURIComponent(data.settings.facebook)+'&tabs=timeline&width=500&height=650&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false';body.append(frame);
+   const frame=document.createElement('iframe');frame.title=names[key]+' church account';frame.className='channel-frame channel-'+key;frame.referrerPolicy='strict-origin-when-cross-origin';
+   frame.src=key==='tiktok'?'/channel/tiktok':'https://www.facebook.com/plugins/page.php?href='+encodeURIComponent(data.settings.facebook)+'&tabs=timeline&width=500&height=360&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false';body.append(frame);
   }
  });
  render();

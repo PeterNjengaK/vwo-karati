@@ -118,3 +118,6 @@ Channel browsing update: platform buttons now load account content in place. You
 
 
 UI refresh: public pages use consistent modern typography, rounded surfaces, navigation states, and responsive spacing. Watch & Listen now exposes only keyword search, available months (when more than one exists), and newest/oldest order. The selected platform comes from the channel buttons. Month and order use upload date when supplied, otherwise service date. Filters are hidden where no searchable library entries exist; Facebook and TikTok embeds keep their own controls. Preacher, topic, and Bible passage remain searchable text, with no empty metadata dropdowns.
+
+
+Home slideshow and navigation: the full-width hero starts with the original choir image and rotates through up to five landscape photos from the church image/gallery collection. It offers previous/next and pause controls, pauses on hover/focus and hidden tabs, and respects reduced motion. Navigation stays at the top while scrolling. Social panels use wider desktop layouts; platform widgets still control their internal content and video aspect ratios. Full account archives remain available through the account links; complete searchable imports require authorised platform connections.

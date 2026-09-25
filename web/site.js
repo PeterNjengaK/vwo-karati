@@ -1,3 +1,4 @@
+document.body.classList.add('public-site');
 import {watchPage,mediaHome} from './watch.js';
 import {commercePage,commerceHome,commerceLinks} from './commerce-public.js';
 import {$,escape as e,api,field,textarea,select,bindForm,money,prettyDate} from './shared.js';

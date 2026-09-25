@@ -115,3 +115,6 @@ Orders & registrations lists the latest 500 requests, including project pledges.
 
 
 Channel browsing update: platform buttons now load account content in place. YouTube lists up to 15 recent videos from its public feed (cached for ten minutes), with upload-date and keyword filtering. This is not a full archive import. Facebook uses its public Page timeline widget; TikTok uses its creator profile widget. Those platform-controlled embeds may require sign-in or be unavailable due to account/browser restrictions and are not searchable by our library filters. Full-account links remain available. Admin-curated entries still support richer metadata and service-date filtering.
+
+
+UI refresh: public pages use consistent modern typography, rounded surfaces, navigation states, and responsive spacing. Watch & Listen now exposes only keyword search, available months (when more than one exists), and newest/oldest order. The selected platform comes from the channel buttons. Month and order use upload date when supplied, otherwise service date. Filters are hidden where no searchable library entries exist; Facebook and TikTok embeds keep their own controls. Preacher, topic, and Bible passage remain searchable text, with no empty metadata dropdowns.

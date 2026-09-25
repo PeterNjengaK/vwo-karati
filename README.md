@@ -103,3 +103,6 @@ Open **Website content > Add media / sermon** in the church office. Add a title 
 Visitors can search and filter `/watch`, share message links, and choose an embedded player or open the original video. Automatic channel imports are not configured; add video links manually. Mark a broadcast **Live now** only while it is live, then change its category to **Livestream recording**.
 
 Gallery entries have an album field. Ministry entries have meeting and leader fields. **Church settings** contains service times, church history, first-visit guidance, transport/parking, and children/family information. Use the church leader entry's description and additional details for a biography.
+
+
+Channel browsing update: platform buttons now load account content in place. YouTube lists up to 15 recent videos from its public feed (cached for ten minutes), with upload-date and keyword filtering. This is not a full archive import. Facebook uses its public Page timeline widget; TikTok uses its creator profile widget. Those platform-controlled embeds may require sign-in or be unavailable due to account/browser restrictions and are not searchable by our library filters. Full-account links remain available. Admin-curated entries still support richer metadata and service-date filtering.

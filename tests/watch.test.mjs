@@ -5,6 +5,7 @@ import {mkdtempSync,mkdirSync} from 'node:fs';
 import {openDatabase} from '../server/db.mjs';
 import {hashPassword} from '../server/security.mjs';
 import {createApp} from '../server/index.mjs';
+import {parseFeed,channelFeeds} from '../server/channels.mjs';
 import {sources} from '../web/watch.js';
 test('media sources accept only trusted HTTPS embed hosts',()=>{
  assert.equal(sources({url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ'})[0].embed,'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
@@ -30,7 +31,19 @@ test('admin media publication, filters, consent playback, and mobile layout',asy
  await publicPage.route('https://www.youtube-nocookie.com/**',r=>r.fulfill({contentType:'text/html',body:'Test player'}));await publicPage.getByRole('button',{name:'Play on YouTube'}).click();assert.equal(await publicPage.locator('iframe').count(),1);
  await publicPage.screenshot({path:'test-results/media-desktop.png',fullPage:true});await publicPage.getByRole('button',{name:'Close message'}).click();assert.equal(await publicPage.locator('iframe').count(),0);
  await publicPage.setViewportSize({width:390,height:844});assert.ok(await publicPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await publicPage.screenshot({path:'test-results/media-mobile.png',fullPage:true});
+ await publicPage.route('**/api/channel/youtube',r=>r.fulfill({json:{items:[{id:'youtube-fL8wUivifJA',kind:'sermon',title:'Recent channel service',youtube_url:'https://www.youtube.com/watch?v=fL8wUivifJA',upload_date:'2026-09-20',media_type:'Video'}]}}));
+ await publicPage.getByRole('button',{name:'YouTube',exact:true}).click();await publicPage.getByRole('heading',{name:'Recent channel service'}).waitFor();
+ await publicPage.getByRole('button',{name:'Facebook',exact:true}).click();assert.match(await publicPage.locator('.channel-frame').getAttribute('src'),/^https:\/\/www.facebook.com\/plugins\/page.php/);
+ await publicPage.getByRole('button',{name:'TikTok',exact:true}).click();assert.equal(await publicPage.locator('.channel-frame').getAttribute('src'),'/channel/tiktok');
  await publicPage.goto(base);await publicPage.getByRole('heading',{name:'Faith for your everyday.'}).waitFor();await publicPage.getByRole('heading',{name:'Walking in faith'}).waitFor();
  assert.deepEqual(errors,[]);
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));db.close();}
+});
+
+test('YouTube feed parsing, caching, and URL restrictions',async()=>{
+ const xml='<feed><entry><yt:videoId>fL8wUivifJA</yt:videoId><title>Worship &amp; teaching</title><published>2026-09-20T10:00:00Z</published><media:description>Welcome</media:description></entry><entry><yt:videoId>invalid</yt:videoId></entry></feed>';
+ assert.equal(parseFeed(xml).length,1);assert.equal(parseFeed(xml)[0].title,'Worship & teaching');
+ let calls=0;const feeds=channelFeeds(async()=>{calls++;return new Response(xml);});
+ await feeds('https://www.youtube.com/channel/UCDo3G1rdEls0kfGyJwqcppg');await feeds('https://www.youtube.com/channel/UCDo3G1rdEls0kfGyJwqcppg');assert.equal(calls,1);
+ await assert.rejects(feeds('https://attacker.test/channel/UCDo3G1rdEls0kfGyJwqcppg'));assert.equal(calls,1);
 });

@@ -112,3 +112,6 @@ Orders & registrations lists the latest 500 requests, including project pledges.
 - Featured and recent messages appear on the homepage. Videos stay hosted by their respective platforms.
 - Gallery entries support named albums; ministries support meeting details and a leader; Church settings supports first-visit, transport, and family guidance. Existing church history, leader biographies, and service times remain editable.
 - The homepage gives an accurate giving call-to-action while M-Pesa is unavailable.
+
+
+Channel browsing update: platform buttons now load account content in place. YouTube lists up to 15 recent videos from its public feed (cached for ten minutes), with upload-date and keyword filtering. This is not a full archive import. Facebook uses its public Page timeline widget; TikTok uses its creator profile widget. Those platform-controlled embeds may require sign-in or be unavailable due to account/browser restrictions and are not searchable by our library filters. Full-account links remain available. Admin-curated entries still support richer metadata and service-date filtering.

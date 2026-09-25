@@ -1,0 +1,12 @@
+const decode=s=>s.replace(/&(?:amp|lt|gt|quot|apos);/g,v=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&apos;':"'"}[v])).replace(/&#(x[0-9a-f]+|[0-9]+);/gi,(_,v)=>{const n=v[0].toLowerCase()==='x'?parseInt(v.slice(1),16):Number(v);return n<=0x10ffff?String.fromCodePoint(n):'';});
+export function parseFeed(xml){return [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map(([,entry])=>{const tag=n=>decode(entry.match(new RegExp('<'+n+'>([\\s\\S]*?)</'+n+'>'))?.[1]||'');const id=tag('yt:videoId');return {id:'youtube-'+id,kind:'sermon',title:tag('title'),description:tag('media:description').slice(0,2000),upload_date:tag('published').slice(0,10),youtube_url:'https://www.youtube.com/watch?v='+id,image:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',media_type:'Video',external:true};}).filter(c=>/^youtube-[\w-]{11}$/.test(c.id));}
+export function channelFeeds(fetcher=fetch){const cache=new Map();let pending;
+ async function get(url){for(let i=0;i<5;i++){const r=await fetcher(url,{signal:AbortSignal.timeout(10000),redirect:'manual'});if(![301,302,303,307,308].includes(r.status))return r;const next=new URL(r.headers.get('location'),url);if(next.protocol!=='https:'||!['www.youtube.com','consent.youtube.com'].includes(next.hostname))throw new Error('Unexpected channel redirect');url=next.href;}throw new Error('Too many channel redirects');}
+
+ return async function youtube(raw){
+  const u=new URL(raw);if(u.protocol!=='https:'||!['www.youtube.com','youtube.com'].includes(u.hostname)||!/^\/(?:@[\w.-]+|channel\/UC[\w-]{22})\/?$/.test(u.pathname))throw new Error('Configure a YouTube channel URL.');
+  const key=u.pathname,old=cache.get(key);if(old&&Date.now()-old.time<600000)return old.result;
+  if(pending?.key===key)return pending.promise;
+  const promise=(async()=>{try{let id=key.match(/channel\/(UC[\w-]{22})/)?.[1];if(!id){const r=await get('https://www.youtube.com'+key);if(!r.ok)throw new Error('Channel unavailable');const html=await r.text();id=html.match(/feeds\/videos\.xml\?channel_id=(UC[\w-]{22})/)?.[1];}if(!id)throw new Error('Channel feed unavailable');const r=await get('https://www.youtube.com/feeds/videos.xml?channel_id='+id);if(!r.ok)throw new Error('Feed unavailable');const result={items:parseFeed(await r.text()),stale:false};cache.clear();cache.set(key,{time:Date.now(),result});return result;}catch(error){if(old)return {...old.result,stale:true};throw error;}finally{pending=null;}})();pending={key,promise};return promise;
+ };
+}

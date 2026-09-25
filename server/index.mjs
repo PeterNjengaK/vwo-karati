@@ -1,3 +1,4 @@
+import {channelFeeds} from './channels.mjs';
 import {commerce,commerceData} from './commerce.mjs';
 import {trafficAnalytics} from './traffic.mjs';
 import http from 'node:http';
@@ -23,6 +24,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
   const operations=officeOperations({db,env,audit});
   const traffic=trafficAnalytics(db);
   const shop=commerce(db);
+  const youtubeFeed=channelFeeds();
   const contentRows=rows=>rows.map(r=>({id:r.id,kind:r.kind,published:!!r.published,...JSON.parse(r.data)}));
   const members=()=>db.prepare('SELECT * FROM members ORDER BY created_at DESC').all().map(r=>({id:r.id,...JSON.parse(r.data),version:r.version,created_at:r.created_at,updated_at:r.updated_at}));
   function limit(key,max,ms) {
@@ -66,7 +68,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
     res.setHeader('X-Frame-Options','DENY');
     res.setHeader('Cache-Control','no-store');
     res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com https://www.facebook.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://www.facebook.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     if(production) res.setHeader('Strict-Transport-Security','max-age=31536000');
     const send=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));};
     try {
@@ -74,6 +76,18 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
       const peer=req.socket.remoteAddress||'unknown';
       const proxyIp=req.headers['x-real-ip'];
       const ip=env.TRUST_LOCAL_PROXY==='true'&&['127.0.0.1','::1','::ffff:127.0.0.1'].includes(peer)&&typeof proxyIp==='string'&&isIP(proxyIp)?proxyIp:peer;
+      if(path==='/api/channel/youtube'&&method==='GET'){
+        const settings=JSON.parse(db.prepare('SELECT data FROM settings WHERE id=1').get().data);
+        try{return send(await youtubeFeed(settings.youtube));}catch{return send({items:[],error:'YouTube is temporarily unavailable. Please try again or open the channel.'},503);}
+      }
+      if(path==='/channel/tiktok'&&method==='GET'){
+        const settings=JSON.parse(db.prepare('SELECT data FROM settings WHERE id=1').get().data);
+        let handle='';try{const u=new URL(settings.tiktok);if(u.protocol==='https:'&&['www.tiktok.com','tiktok.com'].includes(u.hostname))handle=u.pathname.match(/^\/@([\w.-]+)\/?$/)?.[1]||'';}catch{}
+        if(!handle)fail(404,'TikTok channel is not configured.');
+        res.setHeader('X-Frame-Options','SAMEORIGIN');
+        res.setHeader('Content-Security-Policy',"default-src 'none'; script-src https://www.tiktok.com https://lf16-tiktok-web.tiktokcdn-us.com; style-src 'unsafe-inline' https://lf16-tiktok-web.tiktokcdn-us.com; img-src https: data:; frame-src https://www.tiktok.com; connect-src https://www.tiktok.com; frame-ancestors 'self'; base-uri 'none'");
+        res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>TikTok church videos</title></head><body><blockquote class="tiktok-embed" cite="https://www.tiktok.com/@${handle}" data-unique-id="${handle}" data-embed-type="creator"><section><a target="_blank" rel="noopener" href="https://www.tiktok.com/@${handle}">View @${handle} on TikTok</a></section></blockquote><script async src="https://www.tiktok.com/embed.js"></script></body></html>`);
+      }
       if(path==='/api/health'&&method==='GET') return send({ok:true});
       if(!path.startsWith('/api/')) {
         if(method!=='GET'&&method!=='HEAD') fail(405,'Method not allowed.');

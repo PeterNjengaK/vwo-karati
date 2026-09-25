@@ -46,3 +46,5 @@ body.welcome-notice-open{overflow:hidden}dialog.welcome-notice{width:min(660px,9
 @media(max-width:600px){.media-filters{grid-template-columns:1fr;padding:20px}.media-query{grid-column:auto}.watch-feature{padding:22px}.channel-links .btn{flex:1}.watch-feature .actions{align-items:stretch;flex-direction:column}}
 
 .media-more[hidden]{display:none}.gallery-grid figure[hidden]{display:none}
+
+.channel-links [aria-pressed="true"]{background:var(--green);color:white}.watch-feature .channel-frame{width:min(100%,720px);height:680px;aspect-ratio:auto;background:white}.channel-frame{border:0}#channel-feed:not(:empty){margin-bottom:28px}

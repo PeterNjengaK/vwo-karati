@@ -68,7 +68,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
     res.setHeader('X-Frame-Options','DENY');
     res.setHeader('Cache-Control','no-store');
     res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=()');
-    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-src 'self' https://www.youtube-nocookie.com https://www.facebook.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; frame-src 'self' https://maps.google.com https://www.google.com https://www.youtube-nocookie.com https://www.facebook.com https://www.tiktok.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     if(production) res.setHeader('Strict-Transport-Security','max-age=31536000');
     const send=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));};
     try {
@@ -107,7 +107,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
           file=resolve(root,'Website/images',name);
         } else {
           const name=aliases[path]||path.slice(1);
-          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','watch.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
+          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','watch.js','public-extras.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
           file=resolve(root,'web',name);
         }
         const data=await readFile(file);
@@ -282,6 +282,11 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
         for(const key of ['name','tagline','welcome','mission','story','address','service_times']) data[key]=string(b[key],key,3000);
         data.email=email(b.email);data.phone=b.phone?phone(b.phone):'';
         for(const key of ['youtube','facebook','tiktok']) data[key]=safeUrl(b[key]);
+        data.whatsapp=string(b.whatsapp||'','WhatsApp number',25,false).replace(/[ +()-]/g,'');
+        if(data.whatsapp&&!/^[1-9]\d{7,14}$/.test(data.whatsapp))fail(400,'Enter a WhatsApp number with country code.');
+        data.home_video=safeUrl(b.home_video);
+        if(data.home_video){const u=new URL(data.home_video);const id=u.hostname==='youtu.be'?u.pathname.slice(1):['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)?u.searchParams.get('v')||u.pathname.match(/^\/(?:live|shorts|embed)\/([^/]+)/)?.[1]:'';if(!/^[\w-]{11}$/.test(id||''))fail(400,'Use a direct YouTube video link for the homepage.');}
+
         for(const key of ['visit_info','transport_info','children_info'])data[key]=string(b[key]||'',key,3000,false);
         db.prepare('UPDATE settings SET data=? WHERE id=1').run(JSON.stringify(data));audit(user.id,'settings.updated');return send({ok:true});
       }

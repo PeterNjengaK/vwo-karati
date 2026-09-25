@@ -1,3 +1,4 @@
+import {churchChat} from './chat.mjs';
 import {channelFeeds} from './channels.mjs';
 import {commerce,commerceData} from './commerce.mjs';
 import {trafficAnalytics} from './traffic.mjs';
@@ -24,6 +25,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
   const operations=officeOperations({db,env,audit});
   const traffic=trafficAnalytics(db);
   const shop=commerce(db);
+  const chat=churchChat(db);
   const youtubeFeed=channelFeeds();
   const contentRows=rows=>rows.map(r=>({id:r.id,kind:r.kind,published:!!r.published,...JSON.parse(r.data)}));
   const members=()=>db.prepare('SELECT * FROM members ORDER BY created_at DESC').all().map(r=>({id:r.id,...JSON.parse(r.data),version:r.version,created_at:r.created_at,updated_at:r.updated_at}));
@@ -107,7 +109,7 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
           file=resolve(root,'Website/images',name);
         } else {
           const name=aliases[path]||path.slice(1);
-          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','watch.js','public-extras.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
+          if(!['index.html','admin.html','styles.css','site.js','admin.js','shared.js','office-features.js','content-editor.js','commerce-public.js','watch.js','public-extras.js','chat-widget.js','admin-chat.js','install.js','office.webmanifest','office-icon-192.svg','office-icon-512.svg'].includes(name)) fail(404,'Not found.');
           file=resolve(root,'web',name);
         }
         const data=await readFile(file);
@@ -144,6 +146,10 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
         return send({ok:true});
       }
       if(path==='/api/commerce/requests'&&method==='POST'){limit('commerce:'+ip,12,3600000);return send(shop.create(await body(req)),201);}
+      if(path==='/api/chat'&&['GET','POST'].includes(method)){
+        const key=req.headers['x-chat-key'];limit('chat:'+method+':'+ip,method==='GET'?180:40,method==='GET'?60000:3600000);
+        return send(method==='GET'?chat.visitorRead(key):chat.visitorSend(key,await body(req)));
+      }
       if(path==='/api/messages'&&method==='POST') {
         limit('message:'+ip,5,3600000);
         const b=await body(req); if(b.consent!==true) fail(400,'Please consent to the church responding to your message.');
@@ -223,6 +229,14 @@ export function createApp({db=openDatabase(),env=process.env,mpesa=createMpesa(e
         }
       }
       if(user.role!=='admin') fail(403,'Administrator access required.');
+      if(path==='/api/admin/chats'&&method==='GET')return send(chat.list());
+      if(/^\/api\/admin\/chats\/[a-f0-9]{64}$/.test(path)){
+        const id=path.split('/').pop();
+        if(method==='GET')return send(chat.read(id));
+        if(method==='POST'){const result=chat.reply(id,await body(req));audit(user.id,'chat.replied',id);return send(result);}
+        if(method==='DELETE'){chat.remove(id);audit(user.id,'chat.deleted',id);return send({ok:true});}
+      }
+
       if(path==='/api/admin/overview'&&method==='GET') return send({members:db.prepare('SELECT COUNT(*) AS n FROM members').get().n,messages:db.prepare("SELECT COUNT(*) AS n FROM messages WHERE status='new'").get().n,giving:db.prepare("SELECT COALESCE(SUM(amount),0) AS n FROM donations WHERE status='paid' AND mode='production'").get().n,audit:db.prepare('SELECT a.*,u.name FROM audit a LEFT JOIN users u ON u.id=a.actor ORDER BY a.id DESC LIMIT 12').all(),payments:paymentConfig(env)});
       if(path==='/api/admin/import'&&method==='POST') {
         const b=await body(req); if(!Array.isArray(b.members)||b.members.length>2000) fail(400,'Import up to 2,000 members at a time.');

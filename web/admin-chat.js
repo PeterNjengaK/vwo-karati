@@ -1,0 +1,16 @@
+import {escape as e} from './shared.js';
+let inboxTimer;
+export async function chatInbox({current,api,modal,toast}){
+ clearTimeout(inboxTimer);
+ const rows=await api('/api/admin/chats');if(!current())return;
+ document.querySelector('#main').innerHTML=`<div class="page-title"><h1>Website conversations</h1><p>Reply directly to visitors on the website. Visitors must keep their browser tab to receive replies.</p><button class="btn outline" id="refresh-chats">Refresh conversations</button></div><section class="panel"><div class="panel-body">${rows.map(c=>`<button class="chat-inbox-row" data-chat="${e(c.id)}"><strong>${e(c.name)}</strong><span>${c.unread?'New message':'Read'}</span><small>${e(new Date(c.updated_at).toLocaleString())}</small></button>`).join('')||'<p>No website conversations yet.</p>'}</div></section>`;
+ inboxTimer=setTimeout(()=>{if(current()&&!document.querySelector('#editor').open)chatInbox({current,api,modal,toast}).catch(()=>{});},8000);
+ document.querySelector('#refresh-chats').onclick=()=>chatInbox({current,api,modal,toast});
+ document.querySelectorAll('[data-chat]').forEach(button=>button.onclick=async()=>{try{const id=button.dataset.chat,d=await api('/api/admin/chats/'+id);if(!current())return;let requestId=crypto.randomUUID(),timer;
+ modal('Conversation with '+e(d.name),'<div class="chat-admin-log" role="log" aria-label="Visitor conversation"></div><form><label>Reply to visitor<textarea name="message" required maxlength="2000" rows="3"></textarea></label><p class="form-error" role="alert"></p><button class="btn" type="submit">Send reply</button></form><p class="muted">Replies appear in the visitor?s website chat. No WhatsApp or email is sent.</p><button type="button" class="btn danger" id="delete-chat">Delete conversation</button>',async b=>{const result=await api('/api/admin/chats/'+id,{method:'POST',body:{message:b.message,request_id:requestId}});if(!dialog.open||!current())return;draw(result);dialog.querySelector('textarea').value='';requestId=crypto.randomUUID();});
+ const dialog=document.querySelector('#editor'),log=dialog.querySelector('.chat-admin-log');let last=0;
+ function draw(result){const latest=result.messages.at(-1)?.id||0;if(latest===last)return;last=latest;log.innerHTML=result.messages.map(m=>`<div class="chat-bubble ${m.author==='visitor'?'visitor':'church'}"><small>${m.author==='visitor'?e(result.name):'Church team'}</small><p>${e(m.message)}</p><time>${e(new Date(m.created_at).toLocaleString())}</time></div>`).join('');log.scrollTop=log.scrollHeight;}
+ draw(d);const poll=async()=>{if(!dialog.open||!current()||!log.isConnected)return;try{const result=await api('/api/admin/chats/'+id);if(dialog.open&&current()&&log.isConnected)draw(result);}catch{clearInterval(timer);}};timer=setInterval(poll,8000);dialog.addEventListener('close',()=>{clearInterval(timer);if(current())chatInbox({current,api,modal,toast}).catch(()=>{});},{once:true});
+ dialog.querySelector('#delete-chat').onclick=async()=>{if(!confirm('Delete this conversation and its messages? Existing backups are not changed.'))return;try{await api('/api/admin/chats/'+id,{method:'DELETE',body:{}});dialog.close();}catch(err){toast(err.message);}};
+ }catch(err){toast(err.message);}});
+}
